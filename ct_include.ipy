@@ -22,6 +22,7 @@ from back_project import *
 from scan_and_reconstruct import *
 from create_dicom import *
 from xtreme import *
+from conv_linatten import *
 
 #######create object instances#######
 material = Material()
