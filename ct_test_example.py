@@ -7,7 +7,7 @@ from fake_source import *
 from ct_phantom import *
 from ct_lib import *
 from scan_and_reconstruct import *
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity as ssim #python -m pip install scikit-image
 from create_dicom import *
 
 # create object instances
