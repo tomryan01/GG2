@@ -2,7 +2,6 @@ import math
 from random import sample
 import numpy as np
 from scipy import *
-import cv2
 from matplotlib import pyplot as plt
 import scipy
 
