@@ -20,28 +20,36 @@ def ramp_filter(sinogram, scale, alpha=0.001):
 	n = sinogram.shape[1]
 
 	# omega max given by pi/scale (consequence of nyquist sampling theorem)
-	omega_max = math.pi / scale
+	#omega_max = math.pi / scale
 
 	#Set up filter to be at least twice as long as input
 	m = np.ceil(np.log(2*n-1) / np.log(2))
 	m = int(2 ** m)
 
-	# get filter values by computing ramLak of m values between -omega_max and omega_max
-	# then extend these values for all angles
-	filter = np.full((angles, m), ramLak(np.linspace(-omega_max, omega_max, num=m), omega_max, alpha))
-
 	# compute fft of sinogram
 	# axis = 1 ensures fft is in the sample direction (not angle)
 	# n=m pads the result with zeros so that it matches filter dimensions
 	# fftshift centres the frequencies about 0 in the center
-	sin_fft = scipy.fft.fftshift(scipy.fft(sinogram, n=m, axis=1))
+	sin_fft = np.zeros((angles, m))
+	for a in range(angles):
+		sin_fft[a] = scipy.fft(sinogram[a], n=m)
+	fft_freq = scipy.fft.fftfreq(m, d=scale)
+	fft_freq[0] = fft_freq[1] * (1/6)
+
+	# get filter values by computing ramLak of m values between -omega_max and omega_max
+	# then extend these values for all angles
+	filter = np.full((angles, m), ramLak(fft_freq, max(abs(fft_freq)), alpha))
 
 	# multiply filter by fourier transformed sinogram, then reshift back to standard form
 	# then compute inverse fft and take absolute value
-	filtered = np.absolute(scipy.ifft(scipy.fft.ifftshift(np.multiply(filter, sin_fft))))
+	filtered = np.multiply(filter, sin_fft)
 
-	# no need for negative frequencies so take first m/2 values
-	return filtered[:,0:int(m/2)]
+	# no need for negative frequencies so take first n values
+	#return np.absolute(scipy.fft.ifft(filtered))[:,0:n]
+	ifft= np.zeros((angles, n))
+	for a in range(angles):
+		ifft[a] = scipy.fft.ifft(filtered[a])[0:n]
+	return ifft
 
 # compute ramLak filter value for a single omega given omega_max
 def ramLak(omega, omega_max, alpha):
