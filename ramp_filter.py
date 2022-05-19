@@ -29,10 +29,10 @@ def ramp_filter(sinogram, scale, alpha=0.001):
 	# axis = 1 ensures fft is in the sample direction (not angle)
 	# n=m pads the result with zeros so that it matches filter dimensions
 	# fftshift centres the frequencies about 0 in the center
-	sin_fft = np.zeros((angles, m))
+	sin_fft = np.zeros((angles, m), dtype=complex)
 	for a in range(angles):
 		sin_fft[a] = scipy.fft(sinogram[a], n=m)
-	fft_freq = scipy.fft.fftfreq(m, d=scale)
+	fft_freq = 2*math.pi*scipy.fft.fftfreq(m)/scale
 	fft_freq[0] = fft_freq[1] * (1/6)
 
 	# get filter values by computing ramLak of m values between -omega_max and omega_max
