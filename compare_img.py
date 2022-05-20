@@ -13,10 +13,6 @@ def compare_im(real_im, recon_im, threshold):
 	if real_im.shape != recon_im.shape:
 		raise ValueError('Reconstruted image must be the same size as the origional image')
 	else:
-		#Normalise arrays first
-		real_im = real_im / np.linalg.norm(real_im)
-		recon_im = recon_im / np.linalg.norm(recon_im)
-
 		#Find mean squared error
 		error_im = np.subtract(real_im,recon_im)
 		draw(error_im)

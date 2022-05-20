@@ -41,7 +41,7 @@ def calc_mse(error_im):
 	return (np.square(error_im)).mean()
 
 # calc_ssim determines the structural similarity (ssim) of the real and reconstructed image
-# ranging from 0 to 1 (perfect match).
+# ranging from 0 (no match) to 1 (perfect match).
 def calc_ssim(real_im, recon_im):
 	(score, diff) = ssim(real_im, recon_im, full=True)
 	return score
@@ -79,22 +79,28 @@ threshold3 = np.max(linatten3)*0.01
 def test_1():
 	# What is the test? That the mean squared errors of the reconstructed images for different phantoms
 	# are lower than the threshold set.
-	# What do we expect? That the MSE is few orders of magnitude smaller than the linear attenuation 
+	# What do we expect? That the MSE is a few orders of magnitude smaller than the linear attenuation 
 	# coefficients (~ 0.17 for water, breast tissue and adipose)
 
 	assert calc_mse(calc_error(reconstruction1, linatten1)) < threshold1
 	assert calc_mse(calc_error(reconstruction2, linatten2)) < threshold2
 	assert calc_mse(calc_error(reconstruction3, linatten3)) < threshold3
 	print("passed!")
+	
+	f = open('results/test_1_output.txt', mode='w')
+	f.write('Circle MSE is ' + str(calc_mse(calc_error(reconstruction1, linatten1))))
+	f.write(', Hip Replacement MSE is ' + str(calc_mse(calc_error(reconstruction2, linatten2))))
+	f.write(', Pelvic Fixation Pins MSE is ' + str(calc_mse(calc_error(reconstruction3, linatten3))))
+	f.close()
 
 def test_2():
 	# What is the test? That the error maps contain values close to 0 if the reconstruction is
 	# accurate
 	# What do we expect? Most of the error will be in the non-air parts of the image and the error should be
 	# small in magnitude
-	save_plot(calc_error(reconstruction1, linatten1), 'results', 'Circle Phantom Error')
-	save_plot(calc_error(reconstruction2, linatten2), 'results', 'Hip Replacement Phantom Error')
-	save_plot(calc_error(reconstruction3, linatten3), 'results', 'Pelvic Fixation Pins Error')
+	save_draw(calc_error(reconstruction1, linatten1), 'results', 'Test 2 - Circle Phantom Error')
+	save_draw(calc_error(reconstruction2, linatten2), 'results', 'Test 2 - Hip Replacement Phantom Error')
+	save_draw(calc_error(reconstruction3, linatten3), 'results', 'Test 2 - Pelvic Fixation Pins Error')
 	print("complete!")
 
 def test_3():
@@ -109,6 +115,12 @@ def test_3():
 	assert calc_ssim(reconstruction2, linatten3) > 1 - threshold
 	assert calc_ssim(reconstruction3, linatten3) > 1 - threshold
 	print("passed!")
+
+	f = open('results/test_3_output.txt', mode='w')
+	f.write('Circle SSIM is ' + str(calc_ssim(reconstruction1, linatten1)))
+	f.write(', Hip Replacement SSIM is ' + str(calc_ssim(reconstruction2, linatten2)))
+	f.write(', Pelvic Fixation Pins SSIM is ' + str(calc_ssim(reconstruction3, linatten3)))
+	f.close()
 
 # Run the various tests
 print('Test 1')
