@@ -24,10 +24,6 @@ def scan_and_reconstruct(photons, material, phantom, scale, angles, mas=10000, a
 	# convert detector values into calibrated attenuation values
 	sin = ct_calibrate(photons, material, sin, scale=scale)
 
-	# calibrate for beam hardening
-	f = beam_hardening_calibrate(photons, np.max(phantom.shape), scale, material)
-	sin = f(sin)
-
 	# Ram-Lak
 	sin = ramp_filter(sin, scale, alpha=alpha)
 

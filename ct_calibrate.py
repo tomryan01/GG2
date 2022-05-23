@@ -3,6 +3,8 @@ import math
 import scipy
 from scipy import interpolate
 from attenuate import attenuate
+from beam_hardening_calibrate import beam_hardening_calibrate
+from ct_detect import ct_detect
 
 def ct_calibrate(photons, material, sinogram, scale):
 	""" ct_calibrate convert CT detections to linearised attenuation
@@ -21,11 +23,22 @@ def ct_calibrate(photons, material, sinogram, scale):
 		# catch for single axis array
 		n = len(sinogram)
 
+	depths = np.linspace(0, n*scale, num=n)
+	beam_calibration = ct_detect(photons, material.coeff('Water'), depths)
+
 	# compute attenuation in air for calibration
 	# 2*n*scale is the distance from emitter to detector as given in ct_scan.py
 	calFactor = np.sum(attenuate(photons, material.coeff('Air'), 2*n*scale))
 
 	# perform calibration
 	sinogram = -np.log(sinogram / calFactor)
+	beam_calibration = -np.log(beam_calibration / calFactor)
+
+	# fit a polynomial that maps p -> thickness
+	fit = np.polyfit(beam_calibration, np.linspace(0, n, num=n)*scale, 3)
+	f = lambda p: fit[3] + (p*fit[2]) + ((p**2)*fit[1]) + ((p**3)*fit[0])
+
+	# calibrate for beam hardening
+	sinogram = f(sinogram)
 
 	return sinogram
