@@ -15,7 +15,11 @@ def ct_calibrate(photons, material, sinogram, scale):
 	# Get dimensions and work out detection for just air of twice the side
 
 	# length (has to be the same as in ct_scan.py)
-	n = sinogram.shape[1]
+	try:
+		n = sinogram.shape[1]
+	except:
+		# catch for single axis array
+		n = len(sinogram)
 
 	# compute attenuation in air for calibration
 	# 2*n*scale is the distance from emitter to detector as given in ct_scan.py
