@@ -3,7 +3,7 @@ import math
 import scipy
 from scipy import interpolate
 from attenuate import attenuate
-from beam_hardening_calibrate import beam_hardening_calibrate
+#from beam_hardening_calibrate import beam_hardening_calibrate
 from ct_detect import ct_detect
 
 def ct_calibrate(photons, material, sinogram, scale):
@@ -35,10 +35,10 @@ def ct_calibrate(photons, material, sinogram, scale):
 	beam_calibration = -np.log(beam_calibration / calFactor)
 
 	# fit a polynomial that maps p -> thickness
-	fit = np.polyfit(beam_calibration, np.linspace(0, n, num=n)*scale, 3)
+	'''fit = np.polyfit(beam_calibration, np.linspace(0, n, num=n)*scale, 3)
 	f = lambda p: fit[3] + (p*fit[2]) + ((p**2)*fit[1]) + ((p**3)*fit[0])
 
 	# calibrate for beam hardening
-	sinogram = f(sinogram)
+	sinogram = f(sinogram)'''
 
 	return sinogram
