@@ -298,7 +298,8 @@ class Xtreme(object):
                         fbp = back_project(sin)
 
                         # convert to Hounsfield Units
-                        fbp_hu = hu(p, material, fbp, self.scale)
+                        fbp_hu = 115550 * fbp - 1000
+                        fbp_hu = np.clip(fbp_hu, -1024, 3072)
 						# save as dicom file
                         if storage_directory is None: create_dicom(fbp_hu, file, self.scale, self.scale, z, studyuid, seriesuid, frameuid, time)
                         else: create_dicom(fbp_hu, file, self.scale, self.scale, z, studyuid, seriesuid, frameuid, time, storage_directory=storage_directory)
