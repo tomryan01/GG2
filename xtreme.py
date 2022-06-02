@@ -4,9 +4,15 @@ from scipy import ndimage
 import math
 import os
 import sys
+from material import *
+from source import *
 from ramp_filter import *
 from back_project import *
 from create_dicom import *
+from fake_source import *
+from hu import *
+material = Material()
+source = Source()
 
 class Xtreme(object):
     def __init__(self, file):
@@ -238,7 +244,7 @@ class Xtreme(object):
 
 
 
-    def reconstruct_all(self, file, method=None, alpha=None):
+    def reconstruct_all(self, file, method=None, alpha=None, storage_directory=None):
         
         """ reconstruct_all( FILENAME, ALPHA ) creates a series of DICOM
         files for the Xtreme RSQ data. FILENAME is the base file name for
@@ -272,15 +278,30 @@ class Xtreme(object):
                 pass
             
             else:
-
+                material = Material()
+                p = fake_source(material.mev, 0.06, material.coeff('Aluminium'), 2)
+                
                 # default method should reconstruct each slice separately
                 for scan in range(fan+self.skip_scans,fan+self.fan_scans-self.skip_scans):
                     if (scan<self.scans):
-
 						# reconstruct scan
+                        f, fmin, fmax = self.get_rsq_slice(scan)
+                        f_cal = np.zeros(f.shape)
+                        for i in range(f.shape[1]):
+                            f_cal[:,i] = - np.log(np.divide(f[:,i], fmax[i]))
+                        
+                        f_par_cal = self.fan_to_parallel(f_cal)
+        
+                        # Ram-Lak
+                        sin = ramp_filter(f_par_cal, self.scale, alpha=alpha)
+                        # Back-projection
+                        fbp = back_project(sin)
 
+                        # convert to Hounsfield Units
+                        fbp_hu = hu(p, material, fbp, self.scale)
 						# save as dicom file
+                        if storage_directory is None: create_dicom(fbp_hu, file, self.scale, self.scale, z, studyuid, seriesuid, frameuid, time)
+                        else: create_dicom(fbp_hu, file, self.scale, self.scale, z, studyuid, seriesuid, frameuid, time, storage_directory=storage_directory)
                         z = z + 1
 
-        return
 
