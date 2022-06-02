@@ -1,3 +1,4 @@
+from argparse import ArgumentError
 import math
 from random import sample
 import numpy as np
@@ -37,7 +38,7 @@ def ramp_filter(sinogram, scale, alpha=0.001):
 
 	# get filter values by computing ramLak of m values between -omega_max and omega_max
 	# then extend these values for all angles
-	filter = np.full((angles, m), ramLak(fft_freq, max(abs(fft_freq)), alpha))
+	filter = np.full((angles, m), ramLak(fft_freq, max(abs(fft_freq)), alpha, filter='raised'))
 
 	# multiply filter by fourier transformed sinogram, then reshift back to standard form
 	# then compute inverse fft and take absolute value
@@ -51,5 +52,12 @@ def ramp_filter(sinogram, scale, alpha=0.001):
 	return ifft
 
 # compute ramLak filter value for a single omega given omega_max
-def ramLak(omega, omega_max, alpha):
-	return (np.absolute(omega) / (2*np.pi)) * (np.cos((np.pi/2)*(omega/omega_max))**alpha)
+def ramLak(omega, omega_max, alpha, filter=None):
+	if filter is None:
+		return (np.absolute(omega) / (2*np.pi))
+	elif filter == 'raised':
+		return (np.absolute(omega) / (2*np.pi))*(np.cos((np.pi/2)*(omega/omega_max))**alpha)
+	elif filter == 'hamming':
+		return (np.absolute(omega) / (2*np.pi))*(0.54 - 0.46*np.cos((2*omega*np.pi)/omega_max))
+	else:
+		raise ArgumentError("Invalid filter provided, use 'raised', 'hamming', or leave as None")
