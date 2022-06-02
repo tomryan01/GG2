@@ -3,10 +3,6 @@ import math
 import scipy
 from scipy import interpolate
 from attenuate import attenuate
-<<<<<<< HEAD
-=======
-#from beam_hardening_calibrate import beam_hardening_calibrate
->>>>>>> 95cbcdbbba7703913db009aa16b0b46e376d3af6
 from ct_detect import ct_detect
 
 def ct_calibrate(photons, material, sinogram, scale):
