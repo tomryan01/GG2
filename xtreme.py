@@ -278,8 +278,6 @@ class Xtreme(object):
                 pass
             
             else:
-                material = Material()
-                p = fake_source(material.mev, 0.06, material.coeff('Aluminium'), 2)
                 
                 # default method should reconstruct each slice separately
                 for scan in range(fan+self.skip_scans,fan+self.fan_scans-self.skip_scans):
@@ -288,7 +286,8 @@ class Xtreme(object):
                         f, fmin, fmax = self.get_rsq_slice(scan)
                         f_cal = np.zeros(f.shape)
                         for i in range(f.shape[1]):
-                            f_cal[:,i] = - np.log(np.divide(f[:,i], fmax[i]))
+                            print(np.divide((f[:,i] - fmin[i]), (fmax[i] - fmin[i])))
+                            f_cal[:,i] = - np.log(np.divide((f[:,i] - fmin[i]), (fmax[i] - fmin[i])))
                         
                         f_par_cal = self.fan_to_parallel(f_cal)
         
@@ -298,7 +297,7 @@ class Xtreme(object):
                         fbp = back_project(sin)
 
                         # convert to Hounsfield Units
-                        fbp_hu = 115550 * fbp - 1000
+                        fbp_hu = 54894 * fbp - 1000
                         fbp_hu = np.clip(fbp_hu, -1024, 3072)
 						# save as dicom file
                         if storage_directory is None: create_dicom(fbp_hu, file, self.scale, self.scale, z, studyuid, seriesuid, frameuid, time)
